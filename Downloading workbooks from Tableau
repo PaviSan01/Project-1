@@ -1,0 +1,57 @@
+Downloading Workbooks from Tableau - code
+from tableau_api_lib import TableauServerConnection
+from tableau_api_lib.utils import querying
+from tableau_api_lib import TableauServerConnection
+from tableau_api_lib.utils.querying import get_views_dataframe, get_view_data_dataframe
+from tableau_api_lib.utils import querying, flatten_dict_column
+import tableau_api_lib.utils.querying.workbooks
+import pandas as pd
+from typing import List
+
+tableau_server_config = {
+        'my_env': {
+                'server': 'https://10ax.online.tableau.com',
+                'api_version': '3.20',
+                'personal_access_token_name': 'pt',
+                'personal_access_token_secret': '/3ieCuK7RK+Kg7KULYRrrQ==:GeKCwSJYp7RQ70mcl1dcm8xgwnV90HGV',
+                'site_name': 'Tableau REST API-0.1',
+                'site_url': 'tableaurestapi01'
+        }
+}
+conn = TableauServerConnection(tableau_server_config, env='my_env')
+conn.sign_in()
+
+workbooks_df = querying.get_workbooks_dataframe(conn)
+workbooks_df.head(10)
+
+## Downloading one workbook using its id
+target_wb_id = 'b8bd1965-d011-4a47-bff8-8d7e2353f9a1'
+response = conn.download_workbook(workbook_id=target_wb_id)
+response
+
+Downloading all the tableau workbooks in .twbx format using target_id
+target_wb_id = workbooks_df['id']
+import os
+for i in range(len(target_wb_id)): 
+    response = conn.download_workbook(workbook_id=target_wb_id[i])
+    print(response)
+    parent_dir = "C:/Users/Pavithra/Downloads/"
+    directory = "workbooks/"
+    path = os.path.join(parent_dir, directory)
+    isexists = os.path.exists(path):
+    if i==0 and not isexists:
+        os.mkdir(path)
+    with open(parent_dir+directory+target_wb_id[i]+".twbx",'wb') as file:
+        file.write(response.content)
+        
+ Downloading workbooks as pdf format
+ response1 = conn.download_workbook_pdf(workbook_id=target_wb_id)
+response1
+with open('C:/Users/Pavithra/Downloads/Regional.pdf','wb') as file:
+    file.write(response1.content)
+    
+Downloading workbooks as ppt format
+response2 = conn.download_workbook_powerpoint(workbook_id=target_wb_id)
+response2
+with open('C:/Users/Pavithra/Downloads/Regional.ppt','wb') as file:
+    file.write(response2.content)
